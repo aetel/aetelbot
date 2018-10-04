@@ -1,0 +1,24 @@
+{
+  "telegram token": "INSERT TOKEN HERE",
+  "answers": [
+    "YES",
+    "NO"
+  ],
+  "help": "HELP STRING",
+  "start message": "Este es el bot de la Asociación Electrónica de Teleco. Más info en http://aetel.etsist.upm.es",
+  "devices": {
+    "00:00:00:00:00:00": "Example User",
+    "00:00:00:00:00:02": "Example User 2"
+  },
+  "working directory": "/home/user/project_root",
+  "pictures directory": "/home/user/pictures",
+  "cam url": "http://user:pass@192.168.0.2:554",
+  "network": "192.168.0.0/24",
+  "node": {
+      "puerta": {"hostname":"192.168.0.0", "username":"user", "password":"pass"},
+  },
+  "admin password": "Pas5w0rD",
+  "public group chat id": -1111111111111,
+  "admin group chat id": -1111111111112,
+  "president chat id": 111111111
+}
