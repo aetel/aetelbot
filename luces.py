@@ -46,7 +46,7 @@ def encender(args):
     color_bytes += (bin(color_rgb[1])[2:].rjust(8, "0")+' ')
     color_bytes += bin(color_rgb[2])[2:].rjust(8, "0")
 
-    publish.single("setcolor", color_bytes, hostname=settings.node.puerta.hostname, auth = {'username':settings.node.puerta.username, 'password':settings.node.puerta.password})
+    publish.single("setcolor", color_bytes, hostname=settings.mqtt_hostname, auth = settings.mqtt_auth)
 
 
 def apagar():
@@ -60,7 +60,7 @@ def apagar():
     color_bytes += (bin(color_rgb[1])[2:].rjust(8, "0")+' ')
     color_bytes += bin(color_rgb[2])[2:].rjust(8, "0")
 
-    publish.single("setcolor", color_bytes, hostname=settings.node.puerta.hostname, auth = {'username':settings.node.puerta.username, 'password':settings.node.puerta.password})
+    publish.single("setcolor", color_bytes, hostname=settings.mqtt_hostname, auth = settings.mqtt_auth)
 
 
 if __name__ == "__main__":

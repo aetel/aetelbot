@@ -21,7 +21,8 @@ class DataLoader:
             self.help_string = data_and_settings["help"]
             self.start_message = data_and_settings["start message"]
             self.devices = data_and_settings["devices"]
-            self.mqtt = data_and_settings["mqtt"]
+            self.mqtt_hostname = data_and_settings["mqtt hostname"]
+            self.mqtt_auth = data_and_settings["mqtt auth"]
             self.working_directory = data_and_settings["working directory"]
             self.pictures_directory = data_and_settings["pictures directory"]
             self.cam_url = data_and_settings["cam url"]
@@ -66,8 +67,12 @@ class DataLoader:
         return self.network
 
     @property
-    def mqtt(self):
-        return self.mqtt
+    def mqtt_hostname(self):
+        return self.mqtt_hostname
+
+    @property
+    def mqtt_auth(self):
+        return self.mqtt_auth
 
     @property
     def admin_password(self):
