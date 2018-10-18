@@ -173,7 +173,7 @@ def nuevo_bus(bot, update):
     reply_keyboard = [['1027', '2603'], ['4702', '4281']]
     reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
     bot.send_message(chat_id=update.message.chat_id, 
-                     text="Selecciona la línea", 
+                     text="Selecciona la parada", 
                      reply_markup=reply_markup)
     return BUS
 
