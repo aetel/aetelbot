@@ -3,13 +3,17 @@
 import random
 import telegram
 import network_scan as scan
+import camara
+import puerta
+import luces
+import bus
 import datetime
 import time
 import os
 from logger import get_logger
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, ConversationHandler
 from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
@@ -17,6 +21,8 @@ import paho.mqtt.publish as publish
 
 reload(sys)
 sys.setdefaultencoding('utf8')
+
+BUS, PHOTO, LOCATION, BIO = range(4)
 
 
 def error_callback(bot, update, error):
@@ -93,28 +99,9 @@ def help(bot, update):
     bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def take_http_screenshot():
-    os.system('rm ' + settings.pictures_directory + '/snapshot.jpg')
-    os.system('wget --output-document ' + settings.pictures_directory + '/snapshot.jpg ' + settings.cam_url)
-
-
 def log_message(update):
     logger.info("He recibido: \"" + update.message.text + "\" de " + update.message.from_user.username + " [ID: " + str(
         update.message.chat_id) + "]")
-
-
-def foto(bot, update, args, job_queue, chat_data):
-    log_message(update)
-
-    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
-        bot.send_chat_action(chat_id=update.message.chat_id, action='upload_photo')
-        take_http_screenshot()
-        bot.sendPhoto(chat_id=update.message.chat_id,
-                      photo=open(settings.pictures_directory + '/snapshot.jpg', 'rb'), reply_markup=reply_markup)
-        job = job_queue.run_once(deleteMessage, 5, context=photo_message.message_id)
-        job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
-        chat_data['job'] = job
-        logger.debug(settings.pictures_directory + '/snapshot.jpg')
 
 
 def alguien(bot, update):
@@ -128,22 +115,24 @@ def alguien(bot, update):
         bot.deleteMessage(update.message.message_id)
 
 
-def puerta(bot, update, args, job_queue, chat_data):
+def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
-
+    logger.debug("hostname: " + settings.mqtt["hostname"] + 
+                "\n username: " + settings.mqtt["username"] + 
+                "\n password: " + settings.mqtt["password"])
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
         bot.sendMessage(update.message.chat_id, text="Abriendo...")
-        publish.single("OPEN", "0", hostname=settings.node.puerta.hostname, auth = {'username':settings.node.puerta.username, 'password':settings.node.puerta.password})
+        puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
         chat_data['job'] = job
-        print('hostname ' + settings.node.puerta.hostname + ' username: ' + settings.node.puerta.username + ' password: ' + settings.node.puerta.password)
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
-        logger.debug('Photo forge attemp')
+        logger.debug('Puerta forge attemp')
 
 
 def reload_data(bot, update):
+    log_message(update)
     if update.message.from_user.id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
@@ -151,8 +140,7 @@ def reload_data(bot, update):
 
 def berbell(bot, update):
     if is_call_available("berbell", update.message.chat.id, 10):
-        bot.send_message(chat_id=update.message.chat_id, text="¡Berbell Imperio!")
-        bot.sendSticker(update.message.chat_id, u'CAADBAADyAADD2LqAAEgnSqFgod7ggI')
+        bot.sendSticker(update.message.chat_id, u'CAADAgADogMAAiCxJgABuNx3vGNQs7EC')
 
 
 def name_changer(bot, job):
@@ -167,9 +155,30 @@ def name_changer(bot, job):
     except:
         logger.exception("Error al actualizar el nombre del grupo AETEL.")
 
+def cambiar_luz(bot, update, args):
+    log_message(update)
+
+    print args[0]
+    
+    if args[0] == "off":
+        luces.apagar()
+    else:
+        luces.encender(args)
+    luces.encender(args)
+    user_says = " ".join(args)
+    update.message.reply_text("You said: " + user_says)
+
+def nuevo_bus(bot, update):
+    log_message(update)
+    reply_keyboard = [['1027', '2603'], ['4702', '4281']]
+    reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
+    bot.send_message(chat_id=update.message.chat_id, 
+                     text="Selecciona la línea", 
+                     reply_markup=reply_markup)
+    return BUS
 
 if __name__ == "__main__":
-    print("AETEL Bot: Starting...")
+    print("aetelbot arrancando...")
 
     logger = get_logger("bot_starter", True)
     load_settings()
@@ -179,16 +188,30 @@ if __name__ == "__main__":
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
         dispatcher.add_handler(CommandHandler('help', help))
-        dispatcher.add_handler(CommandHandler('foto', foto,
+        dispatcher.add_handler(CommandHandler('foto', camara.foto,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        dispatcher.add_handler(CommandHandler('puerta', puerta,
+        dispatcher.add_handler(CommandHandler('puerta', abrir,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
+        dispatcher.add_handler(CommandHandler('luz', cambiar_luz, pass_args=True))
+
+        # Add conversation handler with the states BUS, PHOTO, LOCATION and BIO
+        conv_handler = ConversationHandler(
+            entry_points=[CommandHandler('bus', nuevo_bus)],
+     
+            states={
+                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE)],
+            },
+     
+            fallbacks=[CommandHandler('bus', nuevo_bus)]
+        )
+     
+        dispatcher.add_handler(conv_handler)
         # Inside joke
         berbell_filter = BerbellFilter()
         dispatcher.add_handler(MessageHandler(berbell_filter, berbell))
@@ -205,5 +228,5 @@ if __name__ == "__main__":
         logger.exception("Error al cargar la job list. Ignorando jobs...")
 
     updater.start_polling()
-    logger.info("AETEL Bot: Estoy escuchando.")
+    logger.info("aetelbot a la escucha...")
     updater.idle()

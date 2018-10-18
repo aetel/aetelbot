@@ -21,15 +21,17 @@ class DataLoader:
             self.help_string = data_and_settings["help"]
             self.start_message = data_and_settings["start message"]
             self.devices = data_and_settings["devices"]
+            self.mqtt = data_and_settings["mqtt"]
             self.working_directory = data_and_settings["working directory"]
             self.pictures_directory = data_and_settings["pictures directory"]
             self.cam_url = data_and_settings["cam url"]
             self.network = data_and_settings["network"]
-            self.node = data_and_settings["node"]
             self.admin_password = data_and_settings["admin password"]
             self.public_chatid = data_and_settings["public group chat id"]
             self.admin_chatid = data_and_settings["admin group chat id"]
             self.president_chatid = data_and_settings["president chat id"]
+            self.url_emt_inicio = data_and_settings["url emt inicio"]
+            self.url_emt_final = data_and_settings["url emt final"]
 
     @property
     def telegram_token(self):
@@ -64,8 +66,8 @@ class DataLoader:
         return self.network
 
     @property
-    def node(self):
-        return self.node
+    def mqtt(self):
+        return self.mqtt
 
     @property
     def admin_password(self):
@@ -82,3 +84,11 @@ class DataLoader:
     @property
     def pictures_directory(self):
         return self.pictures_directory
+
+    @property
+    def url_emt_inicio(self):
+        return self.url_emt_inicio
+
+    @property
+    def url_emt_final(self):
+        return self.url_emt_final
