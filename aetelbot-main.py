@@ -187,7 +187,7 @@ if __name__ == "__main__":
     logging.getLogger().addHandler(logging.StreamHandler())
 
     logger = logging.getLogger(__name__)
-
+    logger.info("Current PID:"+str(os.getpid()))
     logger.info("aetelbot arrancando...")
     load_settings()
 
