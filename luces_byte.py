@@ -43,7 +43,6 @@ def cambiar(args):
                 "\n password: " + settings.mqtt_auth["password"])
     user_says = " ".join(args)
     logging.info('Cambiando el color de la luz a '+ user_says)
-
     color_rgb = color_picker(args)
 
     # Ejemplo verde [0, 181, 26]
