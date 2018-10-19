@@ -3,7 +3,6 @@
 import subprocess
 import re
 from data_loader import DataLoader
-import logging
 
 settings = DataLoader()
 
@@ -31,7 +30,6 @@ def room_members_parser(people):
 def who_is_there():
     macs = scan_for_devices()
     who_are_there = []
-    logging.debug("ENCONTRADOS: " + str(macs))
     for mac in scan_for_devices():
         if mac in list(settings.devices.keys()):
             who_are_there.append(settings.devices[mac])
