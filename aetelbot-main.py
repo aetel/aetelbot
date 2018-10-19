@@ -10,7 +10,7 @@ import bus
 import datetime
 import time
 import os
-from logger import get_logger
+import logging
 from data_loader import DataLoader
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, ConversationHandler
@@ -117,9 +117,6 @@ def alguien(bot, update):
 
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
-    #logger.debug("hostname: " + settings.mqtt["hostname"] + 
-     #           "\n username: " + settings.mqtt["username"] + 
-     #           "\n password: " + settings.mqtt["password"])
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
@@ -162,7 +159,6 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
         chat_data['job'] = job
         user_says = " ".join(args)
-        #update.message.reply_text("Encendiendo las luces en color " + user_says)
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
@@ -178,9 +174,18 @@ def nuevo_bus(bot, update):
     return BUS
 
 if __name__ == "__main__":
-    print("aetelbot arrancando...")
 
-    logger = get_logger("bot_starter", True)
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(filename='aetelbot.log',
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s', 
+                        filemode='w')
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    logger = logging.getLogger(__name__)
+
+    logger.info("aetelbot arrancando...")
     load_settings()
 
     try:

@@ -3,11 +3,10 @@
 import subprocess
 import re
 from data_loader import DataLoader
-from logger import get_logger
+import logging
 
 settings = DataLoader()
-logger = get_logger("network_scan")
-logger.setLevel(0)
+
 
 def scan_for_devices():
     try:
@@ -32,7 +31,7 @@ def room_members_parser(people):
 def who_is_there():
     macs = scan_for_devices()
     who_are_there = []
-    logger.debug("ENCONTRADOS: " + str(macs))
+    logging.debug("ENCONTRADOS: " + str(macs))
     for mac in scan_for_devices():
         if mac in list(settings.devices.keys()):
             who_are_there.append(settings.devices[mac])

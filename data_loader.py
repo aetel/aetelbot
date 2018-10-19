@@ -1,22 +1,19 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from logger import get_logger
+import logging
 import json
-
-logger = get_logger("data_loader")
 
 
 class DataLoader:
-
     def __init__(self):
         global data_and_settings
         try:
             json_file = open('data-and-settings.json')
             data_and_settings = json.load(json_file, encoding="utf-8")
         except:
-            logger.exception("Error al cargar el JSON de configuración")
+            logging.exception("Error al cargar el JSON de configuración")
         else:
-            logger.info("JSON cargado con éxito")
+            logging.info("JSON cargado con éxito")
             self.telegram_token = data_and_settings["telegram token"]
             self.help_string = data_and_settings["help"]
             self.start_message = data_and_settings["start message"]
