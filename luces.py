@@ -30,12 +30,14 @@ def color_picker(args):
         color_rgb = [188, 64, 119]
     elif (args[0] == 'blanco'):
         color_rgb = [255,255,255]
+    elif (args[0] == 'off'):
+        color_rgb = [0,0,0]
     else: #RGB mode
         color_rgb = [int(args[0]),int(args[1]),int(args[2])]
     return color_rgb 
 
 
-def encender(args):
+def cambiar(args):
     #log_message(update)
     #logger.debug("hostname: " + settings.mqtt["hostname"] + 
     #            "\n username: " + settings.mqtt["username"] + 
@@ -46,21 +48,7 @@ def encender(args):
     color_bytes += (bin(color_rgb[1])[2:].rjust(8, "0")+' ')
     color_bytes += bin(color_rgb[2])[2:].rjust(8, "0")
 
-    publish.single("setcolor", color_bytes, hostname=settings.mqtt_hostname, auth = settings.mqtt_auth)
-
-
-def apagar():
-    #log_message(update)
-    #logger.debug("hostname: " + settings.mqtt["hostname"] + 
-    #            "\n username: " + settings.mqtt["username"] + 
-    #            "\n password: " + settings.mqtt["password"])
-    color_rgb = [0,0,0]
-
-    color_bytes = (bin(color_rgb[0])[2:].rjust(8, "0")+' ')
-    color_bytes += (bin(color_rgb[1])[2:].rjust(8, "0")+' ')
-    color_bytes += bin(color_rgb[2])[2:].rjust(8, "0")
-
-    publish.single("setcolor", color_bytes, hostname=settings.mqtt_hostname, auth = settings.mqtt_auth)
+    publish.single("setcolor", color_bytes, hostname = settings.mqtt_hostname, auth = settings.mqtt_auth)
 
 
 if __name__ == "__main__":

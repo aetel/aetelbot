@@ -18,6 +18,7 @@ def busE(bot, update):
     parada_numero = update.message.text
     parada_link = (settings.url_emt_inicio+parada_numero+settings.url_emt_final)
     parada_nombre = ('E')
+    #print (parada_link)
     print (emt(parada_nombre,parada_link))
     bot.send_message(update.message.chat_id,emt(parada_nombre,parada_link))
 

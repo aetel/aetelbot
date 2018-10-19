@@ -117,18 +117,17 @@ def alguien(bot, update):
 
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
-    logger.debug("hostname: " + settings.mqtt["hostname"] + 
-                "\n username: " + settings.mqtt["username"] + 
-                "\n password: " + settings.mqtt["password"])
+    #logger.debug("hostname: " + settings.mqtt["hostname"] + 
+     #           "\n username: " + settings.mqtt["username"] + 
+     #           "\n password: " + settings.mqtt["password"])
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
-        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
-        bot.sendMessage(update.message.chat_id, text="Abriendo...")
         puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
         chat_data['job'] = job
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Puerta forge attemp')
+        print('Puerta forge attemp')
 
 
 def reload_data(bot, update):
@@ -155,18 +154,19 @@ def name_changer(bot, job):
     except:
         logger.exception("Error al actualizar el nombre del grupo AETEL.")
 
-def cambiar_luz(bot, update, args):
-    log_message(update)
 
-    print args[0]
-    
-    if args[0] == "off":
-        luces.apagar()
+def cambiar_luz(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        luces.cambiar(args)
+        job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+        chat_data['job'] = job
+        user_says = " ".join(args)
+        #update.message.reply_text("Encendiendo las luces en color " + user_says)
     else:
-        luces.encender(args)
-    luces.encender(args)
-    user_says = " ".join(args)
-    update.message.reply_text("You said: " + user_says)
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        logger.debug('Luces forge attemp')
+        print('Luces forge attemp')
 
 def nuevo_bus(bot, update):
     log_message(update)
@@ -198,7 +198,10 @@ if __name__ == "__main__":
                                               pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
-        dispatcher.add_handler(CommandHandler('luz', cambiar_luz, pass_args=True))
+        dispatcher.add_handler(CommandHandler('luz', cambiar_luz,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
 
         # Add conversation handler with the states BUS, PHOTO, LOCATION and BIO
         conv_handler = ConversationHandler(
