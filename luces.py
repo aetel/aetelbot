@@ -36,7 +36,6 @@ def color_picker(args):
 
 
 def cambiar(args):
-    #log_message(update)
     logging.debug("hostname: " + settings.mqtt_hostname + 
                 "\n username: " + settings.mqtt_auth["username"] + 
                 "\n password: " + settings.mqtt_auth["password"])

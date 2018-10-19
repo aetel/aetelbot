@@ -164,13 +164,16 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
 
-def nuevo_bus(bot, update):
+def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
     reply_keyboard = [['1027', '2603'], ['4702', '4281']]
     reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
-    bot.send_message(chat_id=update.message.chat_id, 
+    bot_message = bot.send_message(chat_id=update.message.chat_id, 
                      text="Selecciona la parada", 
                      reply_markup=reply_markup)
+    job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+    job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
+    chat_data['job'] = job
     return BUS
 
 if __name__ == "__main__":
@@ -210,13 +213,21 @@ if __name__ == "__main__":
 
         # Add conversation handler with the states BUS, PHOTO, LOCATION and BIO
         conv_handler = ConversationHandler(
-            entry_points=[CommandHandler('bus', nuevo_bus)],
+            entry_points=[CommandHandler('bus', nuevo_bus,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)],
      
             states={
-                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE)],
+                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)],
             },
      
-            fallbacks=[CommandHandler('bus', nuevo_bus)]
+            fallbacks=[CommandHandler('bus', nuevo_bus,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)]
         )
      
         dispatcher.add_handler(conv_handler)
