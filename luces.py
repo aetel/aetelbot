@@ -1,12 +1,10 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from data_loader import DataLoader
-from logger import get_logger
+import logging
 import paho.mqtt.publish as publish
 
 settings = DataLoader()
-logger = get_logger("luces")
-logger.setLevel(0)
 
 
 def color_picker(args):
@@ -38,10 +36,11 @@ def color_picker(args):
 
 
 def cambiar(args):
-    #log_message(update)
-    #logger.debug("hostname: " + settings.mqtt["hostname"] + 
-    #            "\n username: " + settings.mqtt["username"] + 
-    #            "\n password: " + settings.mqtt["password"])
+    logging.debug("hostname: " + settings.mqtt_hostname + 
+                "\n username: " + settings.mqtt_auth["username"] + 
+                "\n password: " + settings.mqtt_auth["password"])
+    user_says = " ".join(args)
+    logging.info('Cambiando el color de la luz a '+ user_says)
     color_rgb = color_picker(args)
 
     color_bytes = (bin(color_rgb[0])[2:].rjust(8, "0")+' ')

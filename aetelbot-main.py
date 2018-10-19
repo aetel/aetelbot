@@ -10,7 +10,7 @@ import bus
 import datetime
 import time
 import os
-from logger import get_logger
+import logging
 from data_loader import DataLoader
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, ConversationHandler
@@ -117,9 +117,6 @@ def alguien(bot, update):
 
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
-    #logger.debug("hostname: " + settings.mqtt["hostname"] + 
-     #           "\n username: " + settings.mqtt["username"] + 
-     #           "\n password: " + settings.mqtt["password"])
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
@@ -162,25 +159,36 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
         chat_data['job'] = job
         user_says = " ".join(args)
-        #update.message.reply_text("Encendiendo las luces en color " + user_says)
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
 
-def nuevo_bus(bot, update):
+def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
     reply_keyboard = [['1027', '2603'], ['4702', '4281']]
     reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
-    bot.send_message(chat_id=update.message.chat_id, 
+    bot_message = bot.send_message(chat_id=update.message.chat_id, 
                      text="Selecciona la parada", 
                      reply_markup=reply_markup)
+    job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+    job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
+    chat_data['job'] = job
     return BUS
 
 if __name__ == "__main__":
-    print("aetelbot arrancando...")
 
-    logger = get_logger("bot_starter", True)
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(filename='aetelbot.log',
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s', 
+                        filemode='w')
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    logger = logging.getLogger(__name__)
+
+    logger.info("aetelbot arrancando...")
     load_settings()
 
     try:
@@ -205,13 +213,21 @@ if __name__ == "__main__":
 
         # Add conversation handler with the states BUS, PHOTO, LOCATION and BIO
         conv_handler = ConversationHandler(
-            entry_points=[CommandHandler('bus', nuevo_bus)],
+            entry_points=[CommandHandler('bus', nuevo_bus,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)],
      
             states={
-                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE)],
+                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)],
             },
      
-            fallbacks=[CommandHandler('bus', nuevo_bus)]
+            fallbacks=[CommandHandler('bus', nuevo_bus,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True)]
         )
      
         dispatcher.add_handler(conv_handler)
