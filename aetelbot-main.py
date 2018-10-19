@@ -10,6 +10,7 @@ import bus
 import datetime
 import time
 import os
+import logging
 from data_loader import DataLoader
 import sys
 from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, ConversationHandler
@@ -105,6 +106,7 @@ def alguien(bot, update):
 
 
 def abrir(bot, update, args, job_queue, chat_data):
+    log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
@@ -145,6 +147,7 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         print('Luces forge attemp')
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
+    log_message(update)
     reply_keyboard = [['1027', '2603'], ['4702', '4281']]
     reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
     bot_message = bot.send_message(chat_id=update.message.chat_id, 
@@ -156,6 +159,17 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
     return BUS
 
 if __name__ == "__main__":
+    for handler in logging.root.handlers[:]:
+        logging.root.removeHandler(handler)
+    logging.basicConfig(filename='aetelbot.log',
+                        level=logging.INFO,
+                        format='%(asctime)s %(message)s', 
+                        filemode='w')
+    logging.getLogger().addHandler(logging.StreamHandler())
+
+    logger = logging.getLogger(__name__)
+
+    logger.info("aetelbot arrancando...")
 
     load_settings()
 

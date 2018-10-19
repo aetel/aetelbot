@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from data_loader import DataLoader
+import logging
 import struct
 import paho.mqtt.publish as publish
 
@@ -36,6 +37,13 @@ def color_picker(args):
 
 
 def cambiar(args):
+    #log_message(update)
+    logging.debug("hostname: " + settings.mqtt_hostname + 
+                "\n username: " + settings.mqtt_auth["username"] + 
+                "\n password: " + settings.mqtt_auth["password"])
+    user_says = " ".join(args)
+    logging.info('Cambiando el color de la luz a '+ user_says)
+
     color_rgb = color_picker(args)
 
     # Ejemplo verde [0, 181, 26]

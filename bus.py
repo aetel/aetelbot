@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from data_loader import DataLoader
+import logging
+
 import untangle
 
 settings = DataLoader()
@@ -15,9 +17,12 @@ def deleteMessage(bot, job):
     bot.delete_message(settings.admin_chatid, message_id=job.context)
 
 def busE(bot, update, job_queue, chat_data):
+    logging.info('Contacting the EMT API...')
     parada_numero = update.message.text
     parada_link = (settings.url_emt_inicio+parada_numero+settings.url_emt_final)
     parada_nombre = ('E')
+    logging.debug(emt(parada_nombre,parada_link))
+
     bot.send_message(update.message.chat_id,emt(parada_nombre,parada_link))
     job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
     chat_data['job'] = job
@@ -30,6 +35,7 @@ def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasan
     #Comprobamos que haya algun bus disponble en la parada
     lista1 = parsed_data.Arrives
     if lista1 =="":
+        logging.info('No hay ningún bus disponible')
         return (bus_emoji + " Linea " + bus + " no disponible.")
 
     lista = parsed_data.Arrives.Arrive
