@@ -5,7 +5,7 @@ import telegram
 import network_scan as scan
 import camara
 import puerta
-import luces
+import luces_byte as luces
 import bus
 import datetime
 import time
