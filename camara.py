@@ -9,6 +9,7 @@ def foto(bot, update, args, job_queue, chat_data):
     log_message(update)
     logging.info('Enviando foto...')
     logging.debug('Directorio imágenes: ' + settings.pictures_directory + '/image.jpg')
+
     os.system('wget -nv --output-document ' + pictures_directory + '/image.jpg ' + settings.cam_url)
     photo_message = bot.send_photo(chat_id=chat_id, photo=open('./'+settings.pictures_directory + '/image.jpg', 'rb'))
     os.system('rm ' + settings.pictures_directory + '/image.jpg')

@@ -29,17 +29,11 @@ def error_callback(bot, update, error):
     try:
         raise error
     except Unauthorized:
-        logger.exception("remove update.message.chat_id from conversation list")
     except BadRequest:
-        logger.exception("handle malformed requests - read more below!")
     except TimedOut:
-        logger.exception("handle slow connection problems")
     except NetworkError:
-        logger.exception("handle other connection problems")
     except ChatMigrated as e:
-        logger.exception("the chat_id of a group has changed, use " + e.new_chat_id + " instead")
     except TelegramError:
-        logger.exception("There is some error with Telegram")
 
 
 class BerbellFilter(BaseFilter):
@@ -95,13 +89,9 @@ def start(bot, update):
 
 
 def help(bot, update):
-    log_message(update)
     bot.sendMessage(update.message.chat_id, settings.help_string, parse_mode=telegram.ParseMode.MARKDOWN)
 
 
-def log_message(update):
-    logger.info("He recibido: \"" + update.message.text + "\" de " + update.message.from_user.username + " [ID: " + str(
-        update.message.chat_id) + "]")
 
 
 def alguien(bot, update):
@@ -123,12 +113,10 @@ def abrir(bot, update, args, job_queue, chat_data):
         chat_data['job'] = job
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
-        logger.debug('Puerta forge attemp')
         print('Puerta forge attemp')
 
 
 def reload_data(bot, update):
-    log_message(update)
     if update.message.from_user.id == settings.president_chatid:
         load_settings()
         bot.send_message(chat_id=update.message.chat_id, text="Datos cargados")
@@ -140,20 +128,15 @@ def berbell(bot, update):
 
 
 def name_changer(bot, job):
-    logger.info("Starting scheduled network scan.")
     try:
         if scan.is_someone_there():
             bot.setChatTitle(settings.public_chatid, u"AETEL: \U00002705 Abierto")
-            logger.info("Hay alguien.")
         else:
             bot.setChatTitle(settings.public_chatid, u"AETEL: \U0000274C Cerrado")
-            logger.info("No hay nadie.")
     except:
-        logger.exception("Error al actualizar el nombre del grupo AETEL.")
 
 
 def cambiar_luz(bot, update, args, job_queue, chat_data):
-    log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         luces.cambiar(args)
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
@@ -161,7 +144,6 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         user_says = " ".join(args)
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
-        logger.debug('Luces forge attemp')
         print('Luces forge attemp')
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
@@ -177,7 +159,6 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
     return BUS
 
 if __name__ == "__main__":
-
     for handler in logging.root.handlers[:]:
         logging.root.removeHandler(handler)
     logging.basicConfig(filename='aetelbot.log',
@@ -189,10 +170,10 @@ if __name__ == "__main__":
     logger = logging.getLogger(__name__)
 
     logger.info("aetelbot arrancando...")
+
     load_settings()
 
     try:
-        logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
         dispatcher.add_handler(CommandHandler('help', help))
@@ -236,16 +217,12 @@ if __name__ == "__main__":
         dispatcher.add_handler(MessageHandler(berbell_filter, berbell))
         dispatcher.add_error_handler(error_callback)
     except Exception as ex:
-        logger.exception("Error al conectar con la API de Telegram.")
         quit()
 
     try:
         jobs = updater.job_queue
         job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 300)
-        logger.info("Iniciando jobs")
     except Exception as ex:
-        logger.exception("Error al cargar la job list. Ignorando jobs...")
 
     updater.start_polling()
-    logger.info("aetelbot a la escucha...")
     updater.idle()
