@@ -45,7 +45,7 @@ def error_callback(bot, update, error):
 class BerbellFilter(BaseFilter):
     def filter(self, message):
         lower_message = str(message.text).lower()
-        if ('Berbell' in lower_message) or ('berbell' in lower_message):
+        if ('berbel' in lower_message) or ('berbell' in lower_message):
             return True
         else:
             return False
