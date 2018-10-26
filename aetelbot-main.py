@@ -12,7 +12,8 @@ import os
 import logging
 from data_loader import DataLoader
 import sys
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, RegexHandler, ConversationHandler
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, CallbackQueryHandler
 from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
@@ -20,8 +21,6 @@ import paho.mqtt.publish as publish
 
 reload(sys)
 sys.setdefaultencoding('utf8')
-
-BUS, PHOTO, LOCATION, BIO = range(4)
 
 
 def error_callback(bot, update, error):
@@ -141,15 +140,35 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
-    reply_keyboard = [['1027', '2603'], ['4702', '4281']]
-    reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
-    bot_message = bot.send_message(chat_id=update.message.chat_id, 
-                     text="Selecciona la parada", 
-                     reply_markup=reply_markup)
+    keyboard = [[InlineKeyboardButton("1027", callback_data='1027'),
+                 InlineKeyboardButton("2603", callback_data='2603')],
+                [InlineKeyboardButton("4702", callback_data='4702'),
+                 InlineKeyboardButton("4281", callback_data='4281')]]
+
+    reply_markup = InlineKeyboardMarkup(keyboard)
+    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada", reply_markup=reply_markup)
     job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
-    job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
     chat_data['job'] = job
-    return BUS
+
+def button(bot, update, job_queue, chat_data):
+    query = update.callback_query
+    text =query.data
+    if text == '1027':
+    	logger.info("Comprobando parada 1027")
+        bus.busE(bot, update.callback_query, job_queue, chat_data)
+    elif text == '2603':
+    	logger.info("Comprobando parada 2603")
+        bus.busE(bot, update.callback_query, job_queue, chat_data)
+    elif text == '4702':
+    	logger.info("Comprobando parada 4702")
+        bus.busE(bot, update.callback_query, job_queue, chat_data)
+    elif text == '4281':
+    	logger.info("Comprobando parada 4281")
+        bus.busE(bot, update.callback_query, job_queue, chat_data)
+    else:
+    	logger.info("Botón equivocado")
+        print ("error")
+
 
 if __name__ == "__main__":
 
@@ -184,27 +203,13 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-
-        # Add conversation handler with the states BUS, PHOTO, LOCATION and BIO
-        conv_handler = ConversationHandler(
-            entry_points=[CommandHandler('bus', nuevo_bus,
+        updater.dispatcher.add_handler(CommandHandler("bus", nuevo_bus,
                                               pass_args=True,
                                               pass_job_queue=True,
-                                              pass_chat_data=True)],
-     
-            states={
-                BUS: [RegexHandler('^(1027|2603|4702|4281)$', bus.busE,
-                                              pass_job_queue=True,
-                                              pass_chat_data=True)],
-            },
-     
-            fallbacks=[CommandHandler('bus', nuevo_bus,
-                                              pass_args=True,
-                                              pass_job_queue=True,
-                                              pass_chat_data=True)]
-        )
-     
-        dispatcher.add_handler(conv_handler)
+                                              pass_chat_data=True))
+        updater.dispatcher.add_handler(CallbackQueryHandler(button,
+        									  pass_job_queue=True,
+                                              pass_chat_data=True))
         # Inside joke
         berbell_filter = BerbellFilter()
         dispatcher.add_handler(MessageHandler(berbell_filter, berbell))

@@ -17,13 +17,13 @@ def deleteMessage(bot, job):
 
 def busE(bot, update, job_queue, chat_data):
     logging.info('Contacting the EMT API...')
-    parada_numero = update.message.text
+    parada_numero = update.data
     parada_link = (settings.url_emt_inicio+parada_numero+settings.url_emt_final)
     parada_nombre = ('E')
     logging.debug(emt(parada_nombre,parada_link))
-    bot.send_message(update.message.chat_id,emt(parada_nombre,parada_link))
-    job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
-    chat_data['job'] = job
+    bot.edit_message_text(text=emt(parada_nombre,parada_link),
+                          chat_id=update.message.chat_id,
+                          message_id=update.message.message_id)
 
 #Esta función es de Carlos Cansino
 def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasando como parametros el numero de linea y la parada
