@@ -8,7 +8,8 @@ Has the following commands:
 * foto - sends a picture of AETEL right now (can only be used by members)
 * gif - sends a gif of AETEL right now (can only be used by members)
 * puerta - opens the door (can only be used by members)
-* bus - checks when the next bus to or from Campus Sur comes
+* bus - deploys a menu to check when the next bus to or from Campus Sur comes
+* bus line_Nº stop_Nº - shows when next bus is coming to said stop
 * luz - Lights AETEL
 	use: /luz color
 	supported colors: rojo, naranja, amarillo, verde, azul, indigo, violeta, magenta, blanco

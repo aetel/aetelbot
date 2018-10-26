@@ -150,7 +150,7 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada:", reply_markup=reply_markup)
     else:
         bus.busE(bot, update, args, job_queue, chat_data)
-        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Buscando próximo bus...", reply_markup=reply_markup)
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Buscando próximo bus...")
         job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
     job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
     chat_data['job'] = job
