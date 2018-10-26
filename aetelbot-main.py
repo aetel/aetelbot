@@ -140,13 +140,18 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
-    keyboard = [[InlineKeyboardButton("1027", callback_data='1027'),
-                 InlineKeyboardButton("2603", callback_data='2603')],
-                [InlineKeyboardButton("4702", callback_data='4702'),
-                 InlineKeyboardButton("4281", callback_data='4281')]]
+    if not args:
+        keyboard = [[InlineKeyboardButton("1027", callback_data='1027'),
+                     InlineKeyboardButton("2603", callback_data='2603')],
+                    [InlineKeyboardButton("4702", callback_data='4702'),
+                     InlineKeyboardButton("4281", callback_data='4281')]]
 
-    reply_markup = InlineKeyboardMarkup(keyboard)
-    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada", reply_markup=reply_markup)
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada:", reply_markup=reply_markup)
+    else:
+        bus.busE(bot, update, args, job_queue, chat_data)
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Buscando próximo bus...", reply_markup=reply_markup)
+        job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
     job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
     chat_data['job'] = job
 
@@ -155,16 +160,16 @@ def button(bot, update, job_queue, chat_data):
     text =query.data
     if text == '1027':
     	logger.info("Comprobando parada 1027")
-        bus.busE(bot, update.callback_query, job_queue, chat_data)
+        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '2603':
     	logger.info("Comprobando parada 2603")
-        bus.busE(bot, update.callback_query, job_queue, chat_data)
+        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '4702':
     	logger.info("Comprobando parada 4702")
-        bus.busE(bot, update.callback_query, job_queue, chat_data)
+        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '4281':
     	logger.info("Comprobando parada 4281")
-        bus.busE(bot, update.callback_query, job_queue, chat_data)
+        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     else:
     	logger.info("Botón equivocado")
         print ("error")

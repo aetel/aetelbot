@@ -15,15 +15,27 @@ bus_emoji = u'\U0001F68C'
 def deleteMessage(bot, job):
     bot.delete_message(settings.admin_chatid, message_id=job.context)
 
-def busE(bot, update, job_queue, chat_data):
+def busE(bot, update, args, job_queue, chat_data):
     logging.info('Contacting the EMT API...')
-    parada_numero = update.data
+    print('args: '+str(args))
+    if args == None:
+        parada_numero = update.data
+        bus_nombre = 'E'
+    else:
+        parada_numero = args[1]
+        bus_nombre = args[0]
     parada_link = (settings.url_emt_inicio+parada_numero+settings.url_emt_final)
-    parada_nombre = ('E')
-    logging.debug(emt(parada_nombre,parada_link))
-    bot.edit_message_text(text=emt(parada_nombre,parada_link),
+    print(bus_nombre)
+    logging.debug(emt(bus_nombre,parada_link))
+
+    if args == None:
+        bot.edit_message_text(text=emt(bus_nombre,parada_link),
                           chat_id=update.message.chat_id,
                           message_id=update.message.message_id)
+    else:
+        bot.send_message(update.message.chat_id,emt(bus_nombre,parada_link))
+        job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
+        chat_data['job'] = job
 
 #Esta función es de Carlos Cansino
 def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasando como parametros el numero de linea y la parada
