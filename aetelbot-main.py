@@ -2,7 +2,6 @@
 # -*- coding: utf-8 -*-
 import random
 import telegram
-import network_scan as scan
 import camara
 import puerta
 import luces_byte as luces
@@ -104,17 +103,6 @@ def log_message(update):
         update.message.chat_id) + "]")
 
 
-def alguien(bot, update):
-    if is_call_available("alguien", update.message.chat_id, 15):
-        bot.send_chat_action(chat_id=update.message.chat_id, action='typing')
-        bot.sendMessage(update.message.chat_id,
-                        scan.who_is_there()[
-                            0] + "\n`No podrás hacer otro /alguien hasta dentro de 15 minutos`.",
-                        parse_mode="Markdown")
-    else:
-        bot.deleteMessage(update.message.message_id)
-
-
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
@@ -137,19 +125,6 @@ def reload_data(bot, update):
 def berbell(bot, update):
     if is_call_available("berbell", update.message.chat.id, 10):
         bot.sendSticker(update.message.chat_id, u'CAADAgADogMAAiCxJgABuNx3vGNQs7EC')
-
-
-def name_changer(bot, job):
-    logger.info("Starting scheduled network scan.")
-    try:
-        if scan.is_someone_there():
-            bot.setChatTitle(settings.public_chatid, u"AETEL: \U00002705 Abierto")
-            logger.info("Hay alguien.")
-        else:
-            bot.setChatTitle(settings.public_chatid, u"AETEL: \U0000274C Cerrado")
-            logger.info("No hay nadie.")
-    except:
-        logger.exception("Error al actualizar el nombre del grupo AETEL.")
 
 
 def cambiar_luz(bot, update, args, job_queue, chat_data):
@@ -204,7 +179,6 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        dispatcher.add_handler(CommandHandler('alguien', alguien))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
         dispatcher.add_handler(CommandHandler('luz', cambiar_luz,
                                               pass_args=True,
@@ -241,7 +215,6 @@ if __name__ == "__main__":
 
     try:
         jobs = updater.job_queue
-        job_name_changer = jobs.run_repeating(name_changer, 15 * 60, 300)
         logger.info("Iniciando jobs")
     except Exception as ex:
         logger.exception("Error al cargar la job list. Ignorando jobs...")
