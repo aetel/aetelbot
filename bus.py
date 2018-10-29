@@ -7,11 +7,6 @@ import untangle
 settings = DataLoader()
 
 
-runner_emoji = u'\U0001F3C3'
-sad_emoji = u'\U0001F625'
-working = u'\U000026A0'
-bus_emoji = u'\U0001F68C'
-
 def deleteMessage(bot, job):
     bot.delete_message(settings.admin_chatid, message_id=job.context)
 
@@ -38,6 +33,11 @@ def busE(bot, update, args, job_queue, chat_data):
         chat_data['job'] = job
 
 #Esta función es de Carlos Cansino
+
+runner_emoji = u'\U0001F3C3'
+sad_emoji = u'\U0001F625'
+bus_emoji = u'\U0001F68C'
+
 def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasando como parametros el numero de linea y la parada
 
     parsed_data = untangle.parse(url)
@@ -45,8 +45,8 @@ def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasan
     #Comprobamos que haya algun bus disponble en la parada
     lista1 = parsed_data.Arrives
     if lista1 =="":
-        logging.info('No hay ningún bus disponible')
-        return (bus_emoji + " Linea " + bus + " no disponible.")
+        logging.info('No hay ningún bus disponible.')
+        return (bus_emoji + " Línea " + bus + " no disponible.")
 
     lista = parsed_data.Arrives.Arrive
 
@@ -69,14 +69,14 @@ def emt(bus,url):#Funcion que comprueba el tiempo restante del ultimo bus, pasan
         min = int (time[lines.index(bus)]/60)
         #Segun el tiempo restante cambia el texto de salida
         if min==1:
-            return bus_emoji + " Linea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " Queda menos de 1 minuto. Se encuentra a " + distance[lines.index(bus)] + " metros. " + runner_emoji + runner_emoji
+            return bus_emoji + " Línea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " queda menos de 1 minuto. " + runner_emoji + runner_emoji
         elif min==0:
-            return bus_emoji +" Linea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " Está en la parada " + sad_emoji + sad_emoji
+            return bus_emoji +" Línea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " está en la parada. " + sad_emoji + sad_emoji
         else:
-            return bus_emoji +" Linea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " Quedan " + str(min) + " minutos. Se encuentra a " + distance[lines.index(bus)] + " metros."
+            return bus_emoji +" Línea " + lines [lines.index(bus)] + " destino " + destination[lines.index(bus)] + " quedan " + str(min) + " minutos."
     #Si no esta sacamos un error de no disponible
     else:
-        return (bus_emoji + " Linea " + bus + " no disponible.")
+        return (bus_emoji + " Línea " + bus + " no disponible.")
 
 
 if __name__ == "__main__":
