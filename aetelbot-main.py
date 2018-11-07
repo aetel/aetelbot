@@ -95,8 +95,16 @@ def help(bot, update):
 
 
 def log_message(update):
-    logger.info("He recibido: \"" + update.message.text + "\" de " + update.message.from_user.username + " [ID: " + str(
-        update.message.chat_id) + "]")
+    try:
+         username = update.message.from_user.username
+     except:
+         username = "desconocido"
+     try:
+         text = update.message.text
+     except:
+         text = "algo"
+     logger.info("He recibido: \"" + text + "\" de " + username + " [ID: " + str(
+         update.message.chat_id) + "]")
 
 
 def abrir(bot, update, args, job_queue, chat_data):
