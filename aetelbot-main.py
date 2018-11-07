@@ -1,20 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import random
 import telegram
 import camara
 import puerta
 import luces_byte as luces
 import bus
 import datetime
-import time
 import os
 import logging
 from data_loader import DataLoader
 import sys
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, CallbackQueryHandler
-from random import normalvariate
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 import paho.mqtt.publish as publish
@@ -150,8 +147,6 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada:", reply_markup=reply_markup)
     else:
         bus.busE(bot, update, args, job_queue, chat_data)
-        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Buscando próximo bus...")
-        job = job_queue.run_once(deleteMessage, 2, context=bot_message.message_id)
     job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
     chat_data['job'] = job
 

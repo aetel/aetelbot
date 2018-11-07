@@ -6,13 +6,7 @@ import untangle
 
 settings = DataLoader()
 
-
-def deleteMessage(bot, job):
-    bot.delete_message(settings.admin_chatid, message_id=job.context)
-
 def busE(bot, update, args, job_queue, chat_data):
-    logging.info('Contacting the EMT API...')
-    print('args: '+str(args))
     if args == None:
         parada_numero = update.data
         bus_nombre = 'E'
@@ -20,7 +14,7 @@ def busE(bot, update, args, job_queue, chat_data):
         parada_numero = args[1]
         bus_nombre = args[0]
     parada_link = (settings.url_emt_inicio+parada_numero+settings.url_emt_final)
-    print(bus_nombre)
+    logging.info('Contacting the EMT API... Bus: '+bus_nombre+' Parada: '+parada_numero)
     logging.debug(emt(bus_nombre,parada_link))
 
     if args == None:
@@ -29,8 +23,6 @@ def busE(bot, update, args, job_queue, chat_data):
                           message_id=update.message.message_id)
     else:
         bot.send_message(update.message.chat_id,emt(bus_nombre,parada_link))
-        job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
-        chat_data['job'] = job
 
 #Esta función es de Carlos Cansino
 
