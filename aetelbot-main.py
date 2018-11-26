@@ -11,7 +11,7 @@ import logging
 from data_loader import DataLoader
 import sys
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, BaseFilter, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, CallbackQueryHandler
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 import paho.mqtt.publish as publish
@@ -44,6 +44,10 @@ class BerbellFilter(BaseFilter):
             return True
         else:
             return False
+
+def new_member(bot, update):
+    for member in update.message.new_chat_members:
+        update.message.reply_photo(photo=open(settings.pictures_directory + '/welcome.jpg', 'rb'))
 
 
 def load_settings():
@@ -97,14 +101,14 @@ def help(bot, update):
 def log_message(update):
     try:
          username = update.message.from_user.username
-     except:
-         username = "desconocido"
-     try:
-         text = update.message.text
-     except:
-         text = "algo"
-     logger.info("He recibido: \"" + text + "\" de " + username + " [ID: " + str(
-         update.message.chat_id) + "]")
+    except:
+     username = "desconocido"
+    try:
+     text = update.message.text
+    except:
+     text = "algo"
+    logger.info("He recibido: \"" + text + "\" de " + username + " [ID: " + str(
+     update.message.chat_id) + "]")
 
 
 def abrir(bot, update, args, job_queue, chat_data):
@@ -157,6 +161,11 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         bus.busE(bot, update, args, job_queue, chat_data)
     job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
     chat_data['job'] = job
+
+def remove_bus_keyboard(bot, update, args, job_queue, chat_data):
+    reply_markup = telegram.ReplyKeyboardMarkup(remove_keyboard = True, one_time_keyboard = True)
+    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Teclado borrado", reply_markup=reply_markup)
+    job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
 
 def button(bot, update, job_queue, chat_data):
     query = update.callback_query
@@ -215,6 +224,10 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
+        updater.dispatcher.add_handler(CommandHandler("borrarteclado", remove_bus_keyboard,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
         updater.dispatcher.add_handler(CallbackQueryHandler(button,
         									  pass_job_queue=True,
                                               pass_chat_data=True))
@@ -222,6 +235,10 @@ if __name__ == "__main__":
         berbell_filter = BerbellFilter()
         dispatcher.add_handler(MessageHandler(berbell_filter, berbell))
         dispatcher.add_error_handler(error_callback)
+
+        # Bienvenida a nuevos miembros
+        updater.dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_member))
+
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
         quit()
