@@ -163,9 +163,15 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
     chat_data['job'] = job
 
 def remove_bus_keyboard(bot, update, args, job_queue, chat_data):
-    reply_markup = telegram.ReplyKeyboardMarkup(remove_keyboard = True, one_time_keyboard = True)
-    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Teclado borrado", reply_markup=reply_markup)
-    job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+    log_message(update)
+    reply_keyboard = [['Teclado borrandose']]
+    reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
+    bot_message = bot.send_message(chat_id=update.message.chat_id, 
+                  text="Teclado borrado", 
+                  reply_markup=reply_markup)
+    job = job_queue.run_once(deleteMessage, 0, context=update.message.message_id)
+    job = job_queue.run_once(deleteMessage, 0, context=bot_message.message_id)
+    chat_data['job'] = job
 
 def button(bot, update, job_queue, chat_data):
     query = update.callback_query
