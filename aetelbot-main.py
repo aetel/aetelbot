@@ -102,13 +102,13 @@ def log_message(update):
     try:
          username = update.message.from_user.username
     except:
-     username = "desconocido"
+     username = update.message.from_user.id
     try:
      text = update.message.text
     except:
      text = "algo"
     logger.info("He recibido: \"" + text + "\" de " + username + " [ID: " + str(
-     update.message.chat_id) + "]")
+     update.message.chat_id) + "]"+" en un "+update.message.chat.type)
 
 
 def abrir(bot, update, args, job_queue, chat_data):
@@ -158,39 +158,48 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         reply_markup = InlineKeyboardMarkup(keyboard)
         bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona la parada:", reply_markup=reply_markup)
     else:
-        bus.busE(bot, update, args, job_queue, chat_data)
-    job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
-    chat_data['job'] = job
+        mensaje_bus = bus.busE(bot, update, args, job_queue, chat_data)
 
-def remove_bus_keyboard(bot, update, args, job_queue, chat_data):
-    log_message(update)
-    reply_keyboard = [['Teclado borrandose']]
-    reply_markup = telegram.ReplyKeyboardMarkup(reply_keyboard, one_time_keyboard = True)
-    bot_message = bot.send_message(chat_id=update.message.chat_id, 
-                  text="Teclado borrado", 
-                  reply_markup=reply_markup)
-    job = job_queue.run_once(deleteMessage, 0, context=update.message.message_id)
-    job = job_queue.run_once(deleteMessage, 0, context=bot_message.message_id)
-    chat_data['job'] = job
+    try:
+        mensaje_bus
+    except NameError:
+        mensaje_bus = None
+    if update.message.chat.type in ('group','supergroup'):
+        job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+        logger.info('Borrando mensaje del usuario')
+        if mensaje_bus is not None:
+            job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
+            logger.info('Borrando mensaje '+str(mensaje_bus[1].message_id)+' en '+str(mensaje_bus[0])+' segundos')
+        chat_data['job'] = job
 
 def button(bot, update, job_queue, chat_data):
     query = update.callback_query
-    text =query.data
+    text = query.data
     if text == '1027':
-    	logger.info("Comprobando parada 1027")
-        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
+        logger.info("Comprobando parada 1027")
+        mensaje_bus = bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '2603':
-    	logger.info("Comprobando parada 2603")
-        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
+        logger.info("Comprobando parada 2603")
+        mensaje_bus = bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '4702':
-    	logger.info("Comprobando parada 4702")
-        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
+        logger.info("Comprobando parada 4702")
+        mensaje_bus = bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     elif text == '4281':
-    	logger.info("Comprobando parada 4281")
-        bus.busE(bot, update.callback_query, None, job_queue, chat_data)
+        logger.info("Comprobando parada 4281")
+        mensaje_bus = bus.busE(bot, update.callback_query, None, job_queue, chat_data)
     else:
-    	logger.info("Botón equivocado")
+        logger.info("Botón equivocado")
         print ("error")
+
+    try:
+        mensaje_bus
+    except NameError:
+        mensaje_bus = None
+
+    if mensaje_bus is not None and mensaje_bus[1].chat.type in ('group','supergroup'):
+        job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
+        logger.info('Borrando mensaje '+str(mensaje_bus[1].message_id)+' en '+str(mensaje_bus[0])+' segundos')
+        chat_data['job'] = job
 
 
 if __name__ == "__main__":
@@ -230,12 +239,8 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        updater.dispatcher.add_handler(CommandHandler("borrarteclado", remove_bus_keyboard,
-                                              pass_args=True,
-                                              pass_job_queue=True,
-                                              pass_chat_data=True))
         updater.dispatcher.add_handler(CallbackQueryHandler(button,
-        									  pass_job_queue=True,
+                                              pass_job_queue=True,
                                               pass_chat_data=True))
         # Inside joke
         berbell_filter = BerbellFilter()
