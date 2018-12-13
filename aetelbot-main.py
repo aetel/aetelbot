@@ -155,12 +155,13 @@ def hacer_foto(bot, update, args, job_queue, chat_data):
         logging.debug('Directorio imágenes: ' + settings.pictures_directory + '/image.jpg')
         #mensaje_foto = camara.foto(bot, update.message.chat_id)
 
-        MYDIR = os.path.dirname(__file__)
+        MYDIR = os.path.dirname(os.path.abspath(__file__))
         logging.info(MYDIR)
         pic_dir = os.path.join(MYDIR, settings.pictures_directory)
+        logging.info(pic_dir)
         os.system('wget -nv --output-document ' + pic_dir + '/image.jpg ' + settings.cam_url)
         mensaje_foto = bot.send_photo(chat_id=update.message.chat_id, photo=open(pic_dir+ '/image.jpg', 'rb'))
-        os.system('rm ./'+ pic_dir + '/image.jpg')
+        os.system('rm '+ pic_dir + '/image.jpg')
 
         if update.message.chat.type in ('group','supergroup'):
             job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
