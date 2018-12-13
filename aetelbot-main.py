@@ -47,7 +47,10 @@ class BerbellFilter(BaseFilter):
 
 def new_member(bot, update):
     for member in update.message.new_chat_members:
-        update.message.reply_photo(photo=open(settings.pictures_directory + '/welcome.jpg', 'rb'))
+        MYDIR = os.path.dirname(os.path.abspath(__file__))
+        logging.info(MYDIR)
+        pic_dir = os.path.join(MYDIR, settings.pictures_directory)
+        update.message.reply_photo(photo=open(pic_dir + '/welcome.jpg', 'rb'))
 
 
 def load_settings():
