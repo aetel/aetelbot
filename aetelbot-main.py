@@ -45,12 +45,15 @@ class BerbellFilter(BaseFilter):
         else:
             return False
 
+
 def new_member(bot, update):
     for member in update.message.new_chat_members:
         MYDIR = os.path.dirname(os.path.abspath(__file__))
         logging.info(MYDIR)
         pic_dir = os.path.join(MYDIR, settings.pictures_directory)
         update.message.reply_photo(photo=open(pic_dir + '/welcome.jpg', 'rb'))
+        job = job_queue.run_once(deleteMessage, 14400, context=update.message.message_id)
+        chat_data['job'] = job
 
 
 def load_settings():
@@ -58,14 +61,6 @@ def load_settings():
     global last_function_calls
     settings = DataLoader()
     last_function_calls = {}
-
-
-def is_member(bot, user_id):
-    try:
-        return bot.get_chat_member(chat_id=settings.admin_chatid,
-                                   user_id=user_id).status in ['creator', 'administrator', 'member']
-    except BadRequest:
-        return False
 
 
 def is_call_available(name, chat_id, cooldown):
@@ -156,15 +151,7 @@ def hacer_foto(bot, update, args, job_queue, chat_data):
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         logging.info('Enviando foto...')
         logging.debug('Directorio imágenes: ' + settings.pictures_directory + '/image.jpg')
-        #mensaje_foto = camara.foto(bot, update.message.chat_id)
-
-        MYDIR = os.path.dirname(os.path.abspath(__file__))
-        logging.info(MYDIR)
-        pic_dir = os.path.join(MYDIR, settings.pictures_directory)
-        logging.info(pic_dir)
-        os.system('wget -nv --output-document ' + pic_dir + '/image.jpg ' + settings.cam_url)
-        mensaje_foto = bot.send_photo(chat_id=update.message.chat_id, photo=open(pic_dir+ '/image.jpg', 'rb'))
-        os.system('rm '+ pic_dir + '/image.jpg')
+        mensaje_foto = camara.foto(bot, update.message.chat_id)
 
         if update.message.chat.type in ('group','supergroup'):
             job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
@@ -250,6 +237,7 @@ if __name__ == "__main__":
         logger.info("Conectando con la API de Telegram.")
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
+        dispatcher.add_handler(CommandHandler('start', start))
         dispatcher.add_handler(CommandHandler('help', help))
         dispatcher.add_handler(CommandHandler('foto', hacer_foto,
                                               pass_args=True,
