@@ -1,19 +1,17 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from data_loader import DataLoader
-import logging
+import os
 
 settings = DataLoader()
 
-def foto(bot, update, args, job_queue, chat_data):
-    log_message(update)
-    logging.info('Enviando foto...')
-    logging.debug('Directorio imágenes: ' + settings.pictures_directory + '/image.jpg')
-    os.system('wget -nv --output-document ' + pictures_directory + '/image.jpg ' + settings.cam_url)
-    photo_message = bot.send_photo(chat_id=chat_id, photo=open('./'+settings.pictures_directory + '/image.jpg', 'rb'))
-    os.system('rm ' + settings.pictures_directory + '/image.jpg')
-    job = job_queue.run_once(deleteMessage, 5, context=photo_message.message_id)
-    job = job_queue.run_once(deleteMessage, 5, context=update.message.message_id)
+def foto(bot, chat_id):
+    MYDIR = os.path.dirname(__file__)
+    pic_dir = os.path.join(MYDIR, settings.pictures_directory)
+    os.system('wget -nv --output-document ' + pic_dir + '/image.jpg ' + settings.cam_url)
+    photo_message = bot.send_photo(chat_id=chat_id, photo=open('./'+pic_dir+ '/image.jpg', 'rb'))
+    os.system('rm ' + pic_dir + '/image.jpg')
+    return photo_message
 
 if __name__ == "__main__":
     print ("Bienvenido, se va a aser una fotico.")

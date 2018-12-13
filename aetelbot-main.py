@@ -86,6 +86,7 @@ def is_call_available(name, chat_id, cooldown):
 
 
 def deleteMessage(bot, job):
+    logging.info("Borrando mensaje con ID: "+str(job.context))
     bot.delete_message(settings.admin_chatid, message_id=job.context)
 
 
@@ -102,13 +103,13 @@ def log_message(update):
     try:
          username = update.message.from_user.username
     except:
-     username = update.message.from_user.id
+        username = update.message.from_user.id
     try:
-     text = update.message.text
+        text = update.message.text
     except:
-     text = "algo"
+        text = "algo"
     logger.info("He recibido: \"" + text + "\" de " + username + " [ID: " + str(
-     update.message.chat_id) + "]"+" en un "+update.message.chat.type)
+    update.message.chat_id) + "]"+" en un "+update.message.chat.type)
 
 
 def abrir(bot, update, args, job_queue, chat_data):
@@ -146,6 +147,30 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
+
+def hacer_foto(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        logging.info('Enviando foto...')
+        logging.debug('Directorio imágenes: ' + settings.pictures_directory + '/image.jpg')
+        #mensaje_foto = camara.foto(bot, update.message.chat_id)
+
+        MYDIR = os.path.dirname(__file__)
+        logging.info(MYDIR)
+        pic_dir = os.path.join(MYDIR, settings.pictures_directory)
+        os.system('wget -nv --output-document ' + pic_dir + '/image.jpg ' + settings.cam_url)
+        mensaje_foto = bot.send_photo(chat_id=update.message.chat_id, photo=open(pic_dir+ '/image.jpg', 'rb'))
+        os.system('rm ./'+ pic_dir + '/image.jpg')
+
+        if update.message.chat.type in ('group','supergroup'):
+            job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+            job = job_queue.run_once(deleteMessage, 120, context=mensaje_foto.message_id)
+            chat_data['job'] = job
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        logger.debug('Camera forge attemp')
+        print('Camera forge attemp')
+
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
@@ -222,7 +247,7 @@ if __name__ == "__main__":
         updater = Updater(settings.telegram_token)
         dispatcher = updater.dispatcher
         dispatcher.add_handler(CommandHandler('help', help))
-        dispatcher.add_handler(CommandHandler('foto', camara.foto,
+        dispatcher.add_handler(CommandHandler('foto', hacer_foto,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
