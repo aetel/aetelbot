@@ -112,9 +112,9 @@ def log_message(update):
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid or update.message.chat_id == settings.public_chatid:
-        puerta.abrir()
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
         chat_data['job'] = job
+        puerta.abrir()
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Puerta forge attemp')

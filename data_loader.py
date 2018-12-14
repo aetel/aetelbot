@@ -2,13 +2,15 @@
 # -*- coding: utf-8 -*-
 import logging
 import json
-
+import os
 
 class DataLoader:
     def __init__(self):
         global data_and_settings
         try:
-            json_file = open('data-and-settings.json')
+            work_dir = os.path.dirname(os.path.abspath(__file__))
+            set_dir = os.path.join(work_dir, 'data-and-settings.json')
+            json_file = open(set_dir)
             data_and_settings = json.load(json_file, encoding="utf-8")
         except:
             logging.exception("Error al cargar el JSON de configuración")
