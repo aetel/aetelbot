@@ -188,7 +188,7 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
 
     if update.message.chat.type in ('group','supergroup'):
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
-        if mensaje_bus is not None:
+        if bot_message is not None:
             job = job_queue.run_once(deleteMessage, 90, context=bot_message.message_id)
         if mensaje_bus is not None:
             job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
