@@ -46,10 +46,9 @@ class BerbellFilter(BaseFilter):
             return False
 
 
-def new_member(bot, update):
+def new_member(bot, update, job_queue, chat_data):
     for member in update.message.new_chat_members:
         MYDIR = os.path.dirname(os.path.abspath(__file__))
-        logging.info(MYDIR)
         pic_dir = os.path.join(MYDIR, settings.pictures_directory)
         update.message.reply_photo(photo=open(pic_dir + '/welcome.jpg', 'rb'))
         job = job_queue.run_once(deleteMessage, 14400, context=update.message.message_id)
@@ -158,10 +157,21 @@ def hacer_foto(bot, update, args, job_queue, chat_data):
             job = job_queue.run_once(deleteMessage, 120, context=mensaje_foto.message_id)
             chat_data['job'] = job
     else:
-        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de la Junta Directiva de AETEL")
         logger.debug('Camera forge attemp')
         print('Camera forge attemp')
 
+def enviar_log(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        logging.info('Enviando log...')
+        log_dir = os.path.dirname(os.path.abspath(__file__))
+        #log_dir = os.path.join(log_dir, settings.pictures_directory)
+        bot.send_document(chat_id=update.message.chat_id, document=open(log_dir + '/aetelbot.log', 'rb'))
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de la Junta Directiva de AETEL")
+        logger.debug('Send log forge attemp')
+        print('Send log forge attemp')
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
@@ -249,6 +259,10 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler('log', enviar_log,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('puerta', abrir,
                                               pass_args=True,
                                               pass_job_queue=True,
@@ -271,7 +285,7 @@ if __name__ == "__main__":
         dispatcher.add_error_handler(error_callback)
 
         # Bienvenida a nuevos miembros
-        updater.dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_member))
+        updater.dispatcher.add_handler(MessageHandler(Filters.status_update.new_chat_members, new_member,pass_job_queue=True,pass_chat_data=True))
 
     except Exception as ex:
         logger.exception("Error al conectar con la API de Telegram.")
