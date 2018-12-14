@@ -9,6 +9,7 @@ import datetime
 import os
 import logging
 from data_loader import DataLoader
+from update import update_bot
 import sys
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, CallbackQueryHandler
@@ -173,6 +174,19 @@ def enviar_log(bot, update, args, job_queue, chat_data):
         logger.debug('Send log forge attemp')
         print('Send log forge attemp')
 
+
+def actualizar(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        logging.info('Actualizando bot...')
+        bot.sendMessage(chat_id=update.message.chat_id, text="Be right back")
+        update_bot()
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de la Junta Directiva de AETEL")
+        logger.debug('Bot update forge attemp')
+        print('Bot update forge attemp')
+
+
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
     if not args:
@@ -260,6 +274,10 @@ if __name__ == "__main__":
                                               pass_job_queue=True,
                                               pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('log', enviar_log,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler('update', actualizar,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
