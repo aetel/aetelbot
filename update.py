@@ -1,9 +1,9 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import subprocess
+import sys, os
 
 def update_bot():
-    subprocess.call(['./update-aetelbot.sh'])
+    os.system('sh update-aetelbot.sh')
 
 if __name__ == "__main__":
     print ("A tomar por saco el bot.")
