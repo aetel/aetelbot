@@ -180,12 +180,18 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         mensaje_bus
     except NameError:
         mensaje_bus = None
+
+    try:
+        bot_message
+    except NameError:
+        bot_message = None
+
     if update.message.chat.type in ('group','supergroup'):
         job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
-        logger.info('Borrando mensaje del usuario')
+        if mensaje_bus is not None:
+            job = job_queue.run_once(deleteMessage, 90, context=bot_message.message_id)
         if mensaje_bus is not None:
             job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
-            logger.info('Borrando mensaje '+str(mensaje_bus[1].message_id)+' en '+str(mensaje_bus[0])+' segundos')
         chat_data['job'] = job
 
 def button(bot, update, job_queue, chat_data):
