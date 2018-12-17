@@ -84,7 +84,7 @@ def is_call_available(name, chat_id, cooldown):
 
 
 def deleteMessage(bot, job):
-    logging.info("Borrando mensaje con ID: "+str(job.context.message_id)+" en grupo con ID: "+job.context.chat_id)
+    logging.info("Borrando mensaje con ID: "+str(job.context.message_id)+" en grupo con ID: "+str(job.context.chat_id))
     bot.delete_message(job.context.chat_id, message_id=job.context.message_id)
 
 
