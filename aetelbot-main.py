@@ -52,7 +52,7 @@ def new_member(bot, update, job_queue, chat_data):
         MYDIR = os.path.dirname(os.path.abspath(__file__))
         pic_dir = os.path.join(MYDIR, settings.pictures_directory)
         update.message.reply_photo(photo=open(pic_dir + '/welcome.jpg', 'rb'))
-        job = job_queue.run_once(deleteMessage, 14400, context=update.message.message_id)
+        job = job_queue.run_once(deleteMessage, 14400, context=update.message)
         chat_data['job'] = job
 
 
@@ -85,7 +85,7 @@ def is_call_available(name, chat_id, cooldown):
 
 def deleteMessage(bot, job):
     logging.info("Borrando mensaje con ID: "+str(job.context))
-    bot.delete_message(settings.admin_chatid, message_id=job.context)
+    bot.delete_message(job.context.chat_id, message_id=job.context.message)
 
 
 def start(bot, update):
@@ -113,7 +113,7 @@ def log_message(update):
 def abrir(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid or update.message.chat_id == settings.public_chatid:
-        job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+        job = job_queue.run_once(deleteMessage, 2, context=update.message)
         chat_data['job'] = job
         puerta.abrir()
     else:
@@ -138,7 +138,7 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         luces.cambiar(args)
-        job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+        job = job_queue.run_once(deleteMessage, 2, context=update.message)
         chat_data['job'] = job
         user_says = " ".join(args)
     else:
@@ -154,8 +154,8 @@ def hacer_foto(bot, update, args, job_queue, chat_data):
         mensaje_foto = camara.foto(bot, update.message.chat_id)
 
         if update.message.chat.type in ('group','supergroup'):
-            job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
-            job = job_queue.run_once(deleteMessage, 120, context=mensaje_foto.message_id)
+            job = job_queue.run_once(deleteMessage, 2, context=update.message)
+            job = job_queue.run_once(deleteMessage, 120, context=mensaje_foto)
             chat_data['job'] = job
     else:
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de la Junta Directiva de AETEL")
@@ -211,11 +211,11 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
         bot_message = None
 
     if update.message.chat.type in ('group','supergroup'):
-        job = job_queue.run_once(deleteMessage, 2, context=update.message.message_id)
+        job = job_queue.run_once(deleteMessage, 2, context=update.message)
         if bot_message is not None:
-            job = job_queue.run_once(deleteMessage, 90, context=bot_message.message_id)
+            job = job_queue.run_once(deleteMessage, 90, context=bot_message)
         if mensaje_bus is not None:
-            job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
+            job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1])
         chat_data['job'] = job
 
 def button(bot, update, job_queue, chat_data):
@@ -243,7 +243,7 @@ def button(bot, update, job_queue, chat_data):
         mensaje_bus = None
 
     if mensaje_bus is not None and mensaje_bus[1].chat.type in ('group','supergroup'):
-        job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1].message_id)
+        job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1])
         logger.info('Borrando mensaje '+str(mensaje_bus[1].message_id)+' en '+str(mensaje_bus[0])+' segundos')
         chat_data['job'] = job
 
