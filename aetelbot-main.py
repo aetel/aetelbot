@@ -5,12 +5,14 @@ import camara
 import puerta
 import luces_byte as luces
 import bus
+import crtm_card
 import datetime
 import os
 import logging
 from data_loader import DataLoader
 from update import update_bot
 import sys
+import locale
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, CallbackQueryHandler
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
@@ -218,6 +220,17 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
             job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1])
         chat_data['job'] = job
 
+def comprobar_abono(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    tipo = args[0]
+    numero = args[1]
+
+    tarjeta = crtm_card.card_dates(tipo,numero)
+    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+
+    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Tu abono caduca el "+tarjeta['renovation_date'].strftime('día %d de %B de %Y'))
+
+
 def button(bot, update, job_queue, chat_data):
     query = update.callback_query
     text = query.data
@@ -291,6 +304,10 @@ if __name__ == "__main__":
                                               pass_job_queue=True,
                                               pass_chat_data=True))
         updater.dispatcher.add_handler(CommandHandler("bus", nuevo_bus,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
+        updater.dispatcher.add_handler(CommandHandler("abono", comprobar_abono,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
