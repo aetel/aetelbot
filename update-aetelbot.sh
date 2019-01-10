@@ -8,5 +8,6 @@ git clone https://github.com/aetel/aetelbot
 mv aetelbot/* .
 rm -rf aetelbot
 cp ../aetelbot-old/data-and-settings.json .
+cp ../aetelbot-old/aetelbot.log .
 nohup python aetelbot-main.py &
 echo $! > save_pid.txt
