@@ -13,7 +13,7 @@ Has the following commands:
 * luz - Lights AETEL
 	use: /luz color, /luz r g b (example /luz 120 30 40), /luz color first-led last-led (example /luz BLUE 30 80)
 	supported colors: See Colores.txt
-*Animations - /startanimation
+* animations - Starts light animation
 	use: /startanimation 1
 	supported animations 1 to 6: Random Pixel Fade, Orange Theather Chase, raibow theather chase, Fade In Fade Out, Rotate, Color Waves
 
