@@ -11,8 +11,11 @@ Has the following commands:
 * bus - deploys a menu to check when the next bus to or from Campus Sur comes
 * bus line_Nº stop_Nº - shows when next bus is coming to said stop
 * luz - Lights AETEL
-	use: /luz color
-	supported colors: rojo, naranja, amarillo, verde, azul, indigo, violeta, magenta, blanco
+	use: /luz color, /luz r g b (example /luz 120 30 40), /luz color first-led last-led (example /luz BLUE 30 80)
+	supported colors: See Colores.txt
+*Animations - /startanimation
+	use: /startanimation 1
+	supported animations 1 to 6: Random Pixel Fade, Orange Theather Chase, raibow theather chase, Fade In Fade Out, Rotate, Color Waves
 
 Not implemented:
 
