@@ -147,7 +147,39 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
-
+def apagar_luz(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        luces.apagar()
+        job=job_queue.run_once(deleteMessage, 2, context=update.message)
+        chat_data['job']=job
+        user_says=" ".join(args)
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        logger.debug('Luces forge attemp')
+        print('Luces forge attemp')
+def animacion(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        luces.animacion(args)
+        job=job_queue.run_once(deleteMessage, 2, context=update.message)
+        chat_data['job']=job
+        user_says=" ".join(args)
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        logger.debug('Luces animation forge attemp')
+        print('Luces animation forge attemp')
+def stopanimacion(bot, update, args, job_queue, chat_data):
+    log_message(update)
+    if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
+        luces.animacion(0)
+        job=job_queue.run_once(deleteMessage, 2, context=update.message)
+        chat_data['job']=job
+        user_says=" ".join(args)
+    else:
+        bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
+        logger.debug('Luces stop animation forge attemp')
+        print('Luces stop animation forge attemp')
 def hacer_foto(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
@@ -300,6 +332,18 @@ if __name__ == "__main__":
                                               pass_chat_data=True))
         dispatcher.add_handler(CommandHandler('reload', reload_data))
         dispatcher.add_handler(CommandHandler('luz', cambiar_luz,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler('apagarluz',apagar_luz,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler('startanimation',animacion,
+                                              pass_args=True,
+                                              pass_job_queue=True,
+                                              pass_chat_data=True))
+        dispatcher.add_handler(CommandHandler('paraanimation',stopanimacion,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
