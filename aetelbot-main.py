@@ -14,7 +14,7 @@ from update import update_bot
 import sys
 import locale
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, CallbackQueryHandler
+from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseFilter, CallbackQueryHandler, ConversationHandler
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 import paho.mqtt.publish as publish
@@ -188,6 +188,7 @@ def actualizar(bot, update, args, job_queue, chat_data):
         logger.debug('Bot update forge attemp')
         print('Bot update forge attemp')
 
+ABONO, BUS = range(2)
 
 def nuevo_bus(bot, update, args, job_queue, chat_data):
     log_message(update)
@@ -222,16 +223,26 @@ def nuevo_bus(bot, update, args, job_queue, chat_data):
 
 def comprobar_abono(bot, update, args, job_queue, chat_data):
     log_message(update)
-    tipo = args[0]
-    numero = args[1]
+    if not args:
+        keyboard = [[InlineKeyboardButton("001", callback_data='001'),
+                     InlineKeyboardButton("002", callback_data='002')],
+                    [InlineKeyboardButton("003", callback_data='003'),
+                     InlineKeyboardButton("175", callback_data='175')],
+                    [InlineKeyboardButton("251", callback_data='251')]]
 
-    tarjeta = crtm_card.card_dates(tipo,numero)
+        reply_markup = InlineKeyboardMarkup(keyboard)
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Selecciona los tres últimos números de la primera fila:", reply_markup=reply_markup)
+        return ABONO
+    else:
+        tipo = args[0]
+        numero = args[1]
+        tarjeta = crtm_card.card_dates(tipo,numero)
+
     locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
     bot_message = bot.send_message(chat_id=update.message.chat_id, text="Tu abono caduca el "+tarjeta['renovation_date'].strftime('día %d de %B de %Y'))
 
-
-def button(bot, update, job_queue, chat_data):
+def button_bus(bot, update, job_queue, chat_data):
     query = update.callback_query
     text = query.data
     if text == '1027':
@@ -259,6 +270,47 @@ def button(bot, update, job_queue, chat_data):
         job = job_queue.run_once(deleteMessage, mensaje_bus[0], context=mensaje_bus[1])
         logger.info('Borrando mensaje '+str(mensaje_bus[1].message_id)+' en '+str(mensaje_bus[0])+' segundos')
         chat_data['job'] = job
+
+def button_abono(bot, update, job_queue, chat_data, code):
+    query = update.callback_query
+    text = query.data
+    if text == '001':
+        logger.info("Comprobando parada 001")
+    else:
+        logger.info("Botón equivocado")
+        print ("error")
+
+convo_handler = ConversationHandler(
+    entry_points=[CommandHandler('comprobar_abono', comprobar_abono)],
+    states={
+        '001': [CallbackQueryHandler(button_abono,pass_update_queue=True,pass_job_queue=True,pass_chat_data=True)],
+        BUS: [CallbackQueryHandler(button_bus)]
+    },
+    fallbacks=[CommandHandler('comprobar_abono', comprobar_abono)]
+)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 if __name__ == "__main__":
@@ -311,9 +363,10 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        updater.dispatcher.add_handler(CallbackQueryHandler(button,
-                                              pass_job_queue=True,
-                                              pass_chat_data=True))
+        updater.dispatcher.add_handler(convo_handler)
+        #updater.dispatcher.add_handler(CallbackQueryHandler(button,
+        #                                      pass_job_queue=True,
+        #                                      pass_chat_data=True))
         # Inside joke
         berbell_filter = BerbellFilter()
         dispatcher.add_handler(MessageHandler(berbell_filter, berbell))
