@@ -10,20 +10,23 @@ Has the following commands:
 * puerta - opens the door (can only be used by members)
 * bus - deploys a menu to check when the next bus to or from Campus Sur comes
 * bus line_Nº stop_Nº - shows when next bus is coming to said stop
-* luz - Lights AETEL
-	use: /luz color, /luz r g b (example /luz 120 30 40), /luz color first-led last-led (example /luz BLUE 30 80)
-	supported colors: See Colores.txt
-* animations - Starts light animation
-	use: /startanimation 1
-	supported animations 1 to 6: Random Pixel Fade, Orange Theather Chase, raibow theather chase, Fade In Fade Out, Rotate, Color Waves
+* abono - shows when you CRTM abono ends  
+	- use: /abono 001 0000023768
+	- substitute with your number  
+* luz - lights AETEL  
+	- use: /luz color, /luz r g b (example /luz 120 30 40), /luz color first-led last-led (example /luz BLUE 30 80)  
+	- /apagarluz to turn off  
+	- supported colors: See Colores.txt  
+* animations - starts light animation  
+	- use: /startanimation 1  
+	- /stopanimation to turn it off  
+	- supported animations 1 to 6: Random Pixel Fade, Orange Theather Chase, Raibow Theather Chase, Fade In Fade Out, Rotate, Color Waves  
 
 Not implemented:
 
-* add @someone - only can be used by @aetel admins, adds @someone to the list of AETEL members
-* list - lists all current members and IDs
 * comida - starts a poll to see who eats at school today (can only be started by members)
 * list-comida - lists all the people who eat at school today
-* shut-camera - turns off camera commands
+* shut-camera - turns off camera commands (only admins)
 
 ---
 

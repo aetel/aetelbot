@@ -147,6 +147,8 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
+
+
 def apagar_luz(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
@@ -158,7 +160,9 @@ def apagar_luz(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces forge attemp')
         print('Luces forge attemp')
-def animacion(bot, update, args, job_queue, chat_data):
+
+
+def animation(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         luces.animacion(args)
@@ -169,7 +173,9 @@ def animacion(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces animation forge attemp')
         print('Luces animation forge attemp')
-def stopanimacion(bot, update, args, job_queue, chat_data):
+
+
+def stop_animation(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         luces.animacion(0)
@@ -180,6 +186,8 @@ def stopanimacion(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de AETEL")
         logger.debug('Luces stop animation forge attemp')
         print('Luces stop animation forge attemp')
+
+
 def hacer_foto(bot, update, args, job_queue, chat_data):
     log_message(update)
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
@@ -195,6 +203,7 @@ def hacer_foto(bot, update, args, job_queue, chat_data):
         bot.sendMessage(chat_id=update.message.chat_id, text="Este comando solo se puede usar en el grupo de la Junta Directiva de AETEL")
         logger.debug('Camera forge attemp')
         print('Camera forge attemp')
+
 
 def enviar_log(bot, update, args, job_queue, chat_data):
     log_message(update)
@@ -258,10 +267,12 @@ def comprobar_abono(bot, update, args, job_queue, chat_data):
     numero = args[1]
 
     tarjeta = crtm_card.card_dates(tipo,numero)
-    locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
 
-    bot_message = bot.send_message(chat_id=update.message.chat_id, text="Tu abono caduca el "+tarjeta['renovation_date'].strftime('día %d de %B de %Y'))
-
+    if tarjeta['renovation_date'].strftime('%Y') != '1991':
+        locale.setlocale(locale.LC_TIME, 'es_ES.UTF-8')
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Tu abono caduca el "+tarjeta['renovation_date'].strftime('día %d de %B de %Y'))
+    else:
+        bot_message = bot.send_message(chat_id=update.message.chat_id, text="Tarjeta no válida")
 
 def button(bot, update, job_queue, chat_data):
     query = update.callback_query
@@ -339,11 +350,11 @@ if __name__ == "__main__":
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        dispatcher.add_handler(CommandHandler('startanimation',animacion,
+        dispatcher.add_handler(CommandHandler('startanimation',animation,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))
-        dispatcher.add_handler(CommandHandler('paraanimation',stopanimacion,
+        dispatcher.add_handler(CommandHandler('stopanimation',stop_animation,
                                               pass_args=True,
                                               pass_job_queue=True,
                                               pass_chat_data=True))

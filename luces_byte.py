@@ -12,8 +12,7 @@ def color_picker(args):
     fichero=open("Colores.txt","r")
     linea=fichero.readlines()
     for x in linea:
-        #if x starts_with args[0]:
-        if(x.startswith(args[0])):
+        if x.startswith(args[0]):
            color=x.split(' ')
            color_rgb=[int(color[1]),int(color[2]),int(color[3]),1]
            return color_rgb
@@ -43,7 +42,6 @@ def color_picker(args):
     else: #RGB mode
         color_rgb = [int(args[0]),int(args[1]),int(args[2])]
     return color_rgb 
-#def animation_picker(args):
     
 
 def cambiar(args):
@@ -52,7 +50,10 @@ def cambiar(args):
                 "\n username: " + settings.mqtt_auth["username"] + 
                 "\n password: " + settings.mqtt_auth["password"])
     user_says = " ".join(args)
-    logging.info('Cambiando el color de la luz a '+ user_says)
+    if user_says != " ":
+        logging.info('Cambiando el color de la luz a '+ user_says)
+    else:
+        logging.info('Cambiando el color de la luz')
     inicio=0
     final=633
     if(len(args)==5):
@@ -67,21 +68,30 @@ def cambiar(args):
     # '\x00\x00\x00\x00\x00\x00\x00\xb5\x00\x00\x00\x1a'
     color_rgb[0]=chr(color_rgb[0])
     color_rgb[1]=chr(color_rgb[1])
-    color_rgb[2]=chr(color_rgb[2]) #tienen que estar en char o bin. char da menos problemas. Int no valen  
-    #la colocacion de los bytes, la hace la siguiente funcion
-    color_bytes = struct.pack('ccccccc', color_rgb[0], color_rgb[1], color_rgb[2],chr(inicio&0xFF),chr((inicio >> 8) & 0xFF),chr(final&0xFF),chr((final >> 8) & 0xFF))
-    #el color debe ser codificado de la siguiente manera: Byte_rojo,byte_verde,byte_azul byte_partealta_inicio, byte_partebaja_inicio, byte partealta final byte parte baja final
+    color_rgb[2]=chr(color_rgb[2]) # Tiene que estar en char o bin. char da menos problemas. Int no vale  
+    # La colocacion de los bytes la hace la siguiente funcion
+    color_bytes = struct.pack('ccccccc', color_rgb[0], color_rgb[1], color_rgb[2], chr(inicio&0xFF), chr((inicio >> 8) & 0xFF), chr(final&0xFF), chr((final >> 8) & 0xFF))
+    # El color debe ser codificado de la siguiente manera: byte_rojo, byte_verde, byte_azul, byte_partealta_inicio, byte_partebaja_inicio, byte_partealta_final, byte_partebaja_final
     publish.single("Fuente","1", hostname=settings.mqtt_hostname,auth=settings.mqtt_auth);
     publish.single("SetColor", color_bytes, hostname = settings.mqtt_hostname, auth = settings.mqtt_auth)
+
+
 def apagar():
-    publish.single("Fuente","0", hostname=settings.mqtt_hostname,auth=settings.mqtt_auth);
+    publish.single("Fuente","0", hostname=settings.mqtt_hostname, auth=settings.mqtt_auth);
+
+
 def animacion(args):
     logging.debug("hostname: " + settings.mqtt_hostname + 
                 "\n username: " + settings.mqtt_auth["username"] + 
                 "\n password: " + settings.mqtt_auth["password"])
     user_says = " ".join(args)
-    logging.info('Cambiando animacion a '+ user_says)
+    if user_says != " ":
+        logging.info('Cambiando animacion a '+ user_says)
+    else:
+        logging.info('Cambiando animacion')
     mensaje=struct.pack('c',chr(int(args[0]))) #Esto en ensamblador no pasaba, eh...
-    publish.single("animacion",mensaje,hostname=settings.mqtt_hostname,auth=settings.mqtt_auth)
+    publish.single("animacion", mensaje, hostname=settings.mqtt_hostname, auth=settings.mqtt_auth)
+
+    
 if __name__ == "__main__":
     print ("Bienvenido, se van a encender las luces.")
