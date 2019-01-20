@@ -18,6 +18,8 @@ from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, BaseF
 from telegram.error import (TelegramError, Unauthorized, BadRequest,
                             TimedOut, ChatMigrated, NetworkError)
 import paho.mqtt.publish as publish
+from datetime import datetime, timedelta
+
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -85,6 +87,14 @@ def is_call_available(name, chat_id, cooldown):
         return True
 
 
+def seconds_until_midnight():
+    """Get the number of seconds until midnight."""
+    tomorrow = datetime.now() + timedelta(1)
+    midnight = datetime(year=tomorrow.year, month=tomorrow.month, 
+                        day=tomorrow.day, hour=0, minute=0, second=0)
+    return (midnight - datetime.now()).seconds
+
+
 def deleteMessage(bot, job):
     logging.info("Borrando mensaje con ID: "+str(job.context.message_id)+" en grupo con ID: "+str(job.context.chat_id))
     bot.delete_message(job.context.chat_id, message_id=job.context.message_id)
@@ -141,6 +151,7 @@ def cambiar_luz(bot, update, args, job_queue, chat_data):
     if update.message.chat_id == settings.admin_chatid or update.message.chat_id == settings.president_chatid:
         luces.cambiar(args)
         job = job_queue.run_once(deleteMessage, 2, context=update.message)
+        job = job_queue.run_once(apagar_luz, seconds_until_midnight(), context=update.message)
         chat_data['job'] = job
         user_says = " ".join(args)
     else:
