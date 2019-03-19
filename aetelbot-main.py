@@ -6,7 +6,6 @@ import puerta
 import luces_byte as luces
 import bus
 import crtm_card
-import datetime
 import os
 import logging
 from data_loader import DataLoader
@@ -69,8 +68,8 @@ def load_settings():
 
 def is_call_available(name, chat_id, cooldown):
     global last_function_calls
-    now = datetime.datetime.now()
-    cooldown_time = datetime.datetime.now() - datetime.timedelta(minutes=cooldown)
+    now = datetime.now()
+    cooldown_time = datetime.now() - timedelta(minutes=cooldown)
     if name in last_function_calls.keys():
         if chat_id in last_function_calls[name].keys():
             if last_function_calls[name][chat_id] > cooldown_time:
