@@ -109,3 +109,5 @@ data-and-settings-AETEL.json
 .idea/
 
 config.py
+*.json
+*.out
